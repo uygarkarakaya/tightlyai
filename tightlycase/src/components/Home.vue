@@ -1,8 +1,16 @@
 <template>
-  <DataTable :value="users">
-    <Column header="Users">
+  <DataTable
+    :value="userStore.users"
+    tableClass="p-datatable-gridlines"
+    tableStyle="min-width:30rem;"
+  >
+    <Column>
+      <template #header>
+        <span class="user-table-header"> Users </span>
+      </template>
+
       <template #body="slotProps">
-        <span @click="userClicked(slotProps.data)">
+        <span class="user-row" @click="userClicked(slotProps.data)">
           {{ slotProps.data.name }}
         </span>
       </template>
@@ -11,16 +19,12 @@
 </template>
 <script setup>
 import { ref, onMounted } from "vue";
-import { fetchUsers } from "../services/service";
-const users = ref([]);
+import { useUserStore } from "../stores/store.js";
+
+const userStore = useUserStore();
+
 onMounted(async () => {
-  try {
-    const { data } = await fetchUsers();
-    console.log("data", data);
-    users.value = data;
-  } catch (err) {
-    message.value = "Error fetching users";
-  }
+  userStore.loadUsers();
 });
 
 const userClicked = (user) => {
@@ -28,4 +32,20 @@ const userClicked = (user) => {
 };
 </script>
 
-<style scoped></style>
+<style scoped>
+.user-row {
+  height: 2rem;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.user-table-header {
+  height: 3rem;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+</style>
