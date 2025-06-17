@@ -31,11 +31,17 @@
           </template>
         </Column>
       </DataTable>
+      <Paginator
+        :first="first"
+        :rows="rows"
+        :totalRecords="totalRecords"
+        @page="onPageChange"
+      />
     </div>
   </div>
 </template>
 <script setup>
-import { ref, onMounted, computed, reactive } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { useUserStore } from "../stores/store.js";
 import { useRoute } from "vue-router";
 
@@ -48,6 +54,11 @@ const postData = ref(null);
 const newPostTitle = ref("");
 const newPostContent = ref("");
 
+const first = ref(0);
+const rows = ref(3);
+const totalRecords = ref(0);
+const currentPage = ref(1);
+
 const addressText = computed(() => {
   const userAdress = userData.value?.address;
   return userAdress?.street + " " + userAdress?.suite + " " + userAdress?.city;
@@ -55,10 +66,11 @@ const addressText = computed(() => {
 
 onMounted(async () => {
   await userStore.loadUsers();
-  await loadPostsForPage();
+  await userStore.loadTotalPostsCount(userId);
+  await loadPostsForPage(1);
   userData.value = userStore.getUserById(userId);
   postData.value = userStore.getPostsByUserId(userId);
-  console.log("postdata", postData.value);
+  totalRecords.value = userStore.totalPosts;
 });
 
 const addPosts = async () => {
@@ -72,12 +84,18 @@ const addPosts = async () => {
     postData.value = userStore.getPostsByUserId(userId);
     newPostTitle.value = "";
     newPostContent.value = "";
+    totalRecords.value = userStore.totalPosts;
   }
 };
 
 const deletePost = async (postId) => {
   await userStore.deletePostById(postId);
   postData.value = userStore.getPostsByUserId(userId);
+  totalRecords.value = userStore.totalPosts;
+  //if there is no other item in that page turn previous page
+  if (postData.value.length === 0 && currentPage.value > 1) {
+    await loadPostsForPage(currentPage.value - 1);
+  }
 };
 
 const isPostInputValid = computed(() => {
@@ -85,8 +103,15 @@ const isPostInputValid = computed(() => {
 });
 
 const loadPostsForPage = async (page) => {
+  currentPage.value = page;
+  first.value = (page - 1) * rows.value;
   await userStore.loadPosts(page, userId);
   postData.value = userStore.getPostsByUserId(userId);
+};
+
+const onPageChange = (event) => {
+  const page = Math.floor(event.first / event.rows) + 1;
+  loadPostsForPage(page);
 };
 </script>
 <style scoped>

@@ -11,7 +11,11 @@ export const fetchUsers = () => api.get("/users/");
 
 //fetch posts
 export const fetchPosts = (start = 0, limit = 3, userId) =>
-  api.get(`/posts?userId=${userId}&?_start=${start}&_limit=${limit}`);
+  api.get(`/users/${userId}/posts?_start=${start}&_limit=${limit}`);
+
+//fetch total posts count
+export const fetchUserPostsCount = (userId) =>
+  api.get(`/users/${userId}/posts`);
 
 //add posts
 export const addPost = (post) => api.post("/posts", post);

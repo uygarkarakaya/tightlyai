@@ -3,6 +3,7 @@ import { ref } from "vue";
 import {
   fetchUsers,
   fetchPosts,
+  fetchUserPostsCount,
   addPost,
   deletePost,
 } from "../services/service";
@@ -29,6 +30,15 @@ export const useUserStore = defineStore("user", () => {
     }
   };
 
+  const loadTotalPostsCount = async (userId) => {
+    try {
+      const { data } = await fetchUserPostsCount(userId);
+      totalPosts.value = data.length;
+    } catch (err) {
+      error.value = "Failed to fetch total posts: " + err;
+    }
+  };
+
   const loadPosts = async (page = 1, userId) => {
     loading.value = true;
     error.value = null;
@@ -36,8 +46,6 @@ export const useUserStore = defineStore("user", () => {
       const start = (page - 1) * pageSize;
       const { data } = await fetchPosts(start, pageSize, userId);
       posts.value = data;
-      totalPosts.value = 100;
-
       currentPage.value = page;
     } catch (err) {
       error.value = "Failed to fetch posts: " + err;
@@ -51,13 +59,14 @@ export const useUserStore = defineStore("user", () => {
   };
 
   const getPostsByUserId = (userId) => {
-    return posts.value.filter((u) => String(u.userId) === userId);
+    return posts.value;
   };
 
   const addNewPost = async (post) => {
     try {
       const { data } = await addPost(post);
-      posts.value.push(data);
+      posts.value.unshift(data);
+      totalPosts.value += 1;
     } catch (err) {
       error.value = "Failed to add post: " + err;
     }
@@ -67,6 +76,7 @@ export const useUserStore = defineStore("user", () => {
     try {
       await deletePost(id);
       posts.value = posts.value.filter((post) => post.id !== id);
+      totalPosts.value -= 1;
     } catch (err) {
       error.value = "Failed to delete post: " + err;
     }
@@ -76,8 +86,10 @@ export const useUserStore = defineStore("user", () => {
     users,
     loading,
     error,
+    totalPosts,
     loadUsers,
     loadPosts,
+    loadTotalPostsCount,
     getUserById,
     getPostsByUserId,
     addNewPost,
