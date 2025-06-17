@@ -1,6 +1,7 @@
 <template>
   <div class="user-detail-container">
     <div class="user-profile" v-if="userData">
+      <img :src="userProfileImg" class="user-profile-photo" />
       <span>{{ userData.name }}</span>
       <span>{{ userData.email }}</span>
       <span>{{ userData.phone }}</span>
@@ -11,13 +12,13 @@
       <div class="post-input-row">
         <div class="post-input-box">
           <label for="post-title-input">Post title</label>
-          <input id="post-title-input" type="text" v-model="newPostTitle" />
+          <InputText id="post-title-input" v-model="newPostTitle" />
         </div>
         <div class="post-input-box">
           <label for="post-content-input">Post content</label>
-          <input id="post-content-input" type="text" v-model="newPostContent" />
+          <InputText id="post-content-input" v-model="newPostContent" />
         </div>
-        <button @click="addPosts()">Add</button>
+        <Button @click="addPosts()" label="Add" />
       </div>
       <DataTable :value="postData" :showHeaders="false">
         <Column>
@@ -27,7 +28,12 @@
         </Column>
         <Column>
           <template #body="slotProps">
-            <button @click="deletePost(slotProps.data.id)">Delete</button>
+            <Button
+              @click="deletePost(slotProps.data.id)"
+              label="Delete"
+              severity="danger"
+              size="small"
+            />
           </template>
         </Column>
       </DataTable>
@@ -44,7 +50,7 @@
 import { ref, onMounted, computed } from "vue";
 import { useUserStore } from "../stores/store.js";
 import { useRoute } from "vue-router";
-
+import userProfileImg from "../assets/user-profile.svg";
 const userStore = useUserStore();
 const route = useRoute();
 
@@ -146,5 +152,11 @@ const onPageChange = (event) => {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+}
+.user-profile-photo {
+  width: 4rem;
+  align-self: center;
+  margin-bottom: 2rem;
+  margin-top: 2rem;
 }
 </style>
