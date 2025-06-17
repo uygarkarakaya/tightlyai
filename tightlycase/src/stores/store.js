@@ -22,10 +22,17 @@ export const useUserStore = defineStore("user", () => {
     }
   };
 
+  const getUserById = (id) => {
+    console.log("users", users);
+    console.log("id", id);
+    return users.value.find((u) => String(u.id) === id);
+  };
+
   return {
     users,
     loading,
     error,
     loadUsers,
+    getUserById,
   };
 });

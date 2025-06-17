@@ -4,12 +4,14 @@ import { createApp } from "vue";
 import { createPinia } from "pinia";
 
 import App from "./App.vue";
+import router from "./router";
 import PrimeVue from "primevue/config";
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 
 const app = createApp(App);
 const pinia = createPinia();
+app.use(router);
 
 app.use(PrimeVue);
 app.use(pinia);

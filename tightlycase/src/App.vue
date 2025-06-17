@@ -1,8 +1,4 @@
 <template>
-  <Home />
+  <RouterView />
 </template>
-<script setup>
-import Home from "./components/Home.vue";
-</script>
-
-<style scoped></style>
+<script setup></script>

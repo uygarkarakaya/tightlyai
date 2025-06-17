@@ -20,7 +20,9 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import { useUserStore } from "../stores/store.js";
+import { useRouter } from "vue-router";
 
+const router = useRouter();
 const userStore = useUserStore();
 
 onMounted(async () => {
@@ -28,7 +30,7 @@ onMounted(async () => {
 });
 
 const userClicked = (user) => {
-  console.log("user clicked", user);
+  router.push(`/user/${user.id}`);
 };
 </script>
 
