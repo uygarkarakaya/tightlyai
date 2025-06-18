@@ -1,12 +1,6 @@
 <template>
   <div class="user-detail-container">
-    <div class="user-profile" v-if="userData">
-      <img :src="userProfileImg" class="user-profile-photo" />
-      <span>{{ userData.name }}</span>
-      <span>{{ userData.email }}</span>
-      <span>{{ userData.phone }}</span>
-      <span>{{ addressText }}</span>
-    </div>
+    <UserProfile :userData="userData" />
     <div class="posts">
       <span>Add a new post</span>
       <div class="post-input-row">
@@ -18,7 +12,7 @@
           <label for="post-content-input">Post content</label>
           <InputText id="post-content-input" v-model="newPostContent" />
         </div>
-        <Button @click="addPosts()" label="Add" />
+        <Button @click="addPosts()" :disabled="!isPostInputValid" label="Add" />
       </div>
       <DataTable :value="postData" :showHeaders="false">
         <Column>
@@ -26,7 +20,7 @@
             {{ slotProps.data.title }}
           </template>
         </Column>
-        <Column>
+        <Column style="width: 100px">
           <template #body="slotProps">
             <Button
               @click="deletePost(slotProps.data.id)"
@@ -42,6 +36,7 @@
         :rows="rows"
         :totalRecords="totalRecords"
         @page="onPageChange"
+        class="paginator"
       />
     </div>
   </div>
@@ -50,7 +45,8 @@
 import { ref, onMounted, computed } from "vue";
 import { useUserStore } from "../stores/store.js";
 import { useRoute } from "vue-router";
-import userProfileImg from "../assets/user-profile.svg";
+import UserProfile from "../components/UserProfile.vue";
+
 const userStore = useUserStore();
 const route = useRoute();
 
@@ -64,11 +60,6 @@ const first = ref(0);
 const rows = ref(3);
 const totalRecords = ref(0);
 const currentPage = ref(1);
-
-const addressText = computed(() => {
-  const userAdress = userData.value?.address;
-  return userAdress?.street + " " + userAdress?.suite + " " + userAdress?.city;
-});
 
 onMounted(async () => {
   await userStore.loadUsers();
@@ -98,9 +89,11 @@ const deletePost = async (postId) => {
   await userStore.deletePostById(postId);
   postData.value = userStore.getPostsByUserId(userId);
   totalRecords.value = userStore.totalPosts;
-  //if there is no other item in that page turn previous page
+  //if there is no other item in that page turn previous or next page
   if (postData.value.length === 0 && currentPage.value > 1) {
     await loadPostsForPage(currentPage.value - 1);
+  } else if (postData.value.length === 0 && currentPage.value === 1) {
+    await loadPostsForPage(currentPage.value + 1);
   }
 };
 
@@ -124,16 +117,8 @@ const onPageChange = (event) => {
 .user-detail-container {
   display: flex;
   gap: 1rem;
-  height: 100%;
+  height: 90vh;
   width: 100%;
-}
-.user-profile {
-  display: flex;
-  gap: 12px;
-  flex-direction: column;
-  border: 1px solid;
-  padding: 1.5rem;
-  border-radius: 6px;
 }
 .posts {
   border: 1px solid;
@@ -143,20 +128,21 @@ const onPageChange = (event) => {
   display: flex;
   flex-direction: column;
   gap: 2rem;
+  position: relative;
 }
 .post-input-row {
   display: flex;
   gap: 2rem;
+  align-items: flex-end;
 }
 .post-input-box {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
-.user-profile-photo {
-  width: 4rem;
-  align-self: center;
-  margin-bottom: 2rem;
-  margin-top: 2rem;
+.paginator {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
 }
 </style>

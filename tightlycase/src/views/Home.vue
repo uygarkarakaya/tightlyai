@@ -36,7 +36,6 @@ const userClicked = (user) => {
 
 <style scoped>
 .user-row {
-  height: 2rem;
   width: 100%;
   display: flex;
   align-items: center;
@@ -44,7 +43,6 @@ const userClicked = (user) => {
   cursor: pointer;
 }
 .user-table-header {
-  height: 3rem;
   width: 100%;
   display: flex;
   align-items: center;
